@@ -3,7 +3,7 @@ import json
 import os
 import requests
 from fastapi import FastAPI, Request
-import google.generativeai as genai
+from google import genai
 
 app = FastAPI()
 
@@ -11,10 +11,8 @@ app = FastAPI()
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 TRADERSPOST_WEBHOOK_URL = os.environ.get("TRADERSPOST_WEBHOOK_URL")
 
-if GEMINI_API_KEY:
-  genai.configure(api_key=GEMINI_API_KEY)
-
-model = genai.GenerativeModel("gemini-1.5-pro")
+# Initialize the GenAI Client (automatically picks up GEMINI_API_KEY if not explicitly passed)
+client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else genai.Client()
 
 
 @app.post("/webhook")
@@ -64,8 +62,12 @@ async def handle_tradingview_alert(request: Request):
     }}
     """
 
-  # 3. Generate AI Analysis
-  response = model.generate_content(prompt)
+  # 3. Generate AI Analysis using the new Google GenAI SDK
+  response = client.models.generate_content(
+      model="gemini-1.5-pro",
+      contents=prompt,
+  )
+
   clean_json = response.text.replace("```json", "").replace("```", "").strip()
   decision = json.loads(clean_json)
 
