@@ -1,16 +1,19 @@
 import datetime
 import json
+import os
 import requests
 from fastapi import FastAPI, Request
 import google.generativeai as genai
 
 app = FastAPI()
 
-# Credentials Configuration
-GEMINI_API_KEY = "YOUR_GEMINI_API_KEY"
-TRADERSPOST_WEBHOOK_URL = "YOUR_TRADERSPOST_WEBHOOK_URL"
+# Credentials Configuration (Loaded securely via Render Environment Variables)
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+TRADERSPOST_WEBHOOK_URL = os.environ.get("TRADERSPOST_WEBHOOK_URL")
 
-genai.configure(api_key=GEMINI_API_KEY)
+if GEMINI_API_KEY:
+  genai.configure(api_key=GEMINI_API_KEY)
+
 model = genai.GenerativeModel("gemini-1.5-pro")
 
 
